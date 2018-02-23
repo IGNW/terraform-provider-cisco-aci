@@ -1,49 +1,118 @@
-# Cisco ACI Module
+# Cisco ACI Provider
 
-This repo contains a terraform module for deploying applications on Cisco hardware via [Cisco ACI](https://www.cisco.com/c/en/us/solutions/data-center-virtualization/application-centric-infrastructure/index.html).
+This repo contains a terraform provider for deploying networks on Cisco hardware via [Cisco ACI](https://www.cisco.com/c/en/us/solutions/data-center-virtualization/application-centric-infrastructure/index.html).
 
-## Resources
+## Background
+In modern technology stacks developers and systems engineers find it easy to spin up new networks in the cloud using Terraform. This process is still challenging 
+in more traditional data centers continues to be cumbersome.  In recent years,  Cisco has release the ACI technology to make the process of setting up and configuring networks simpler and faster. The ACI layer adds
+an Application Programmer's Interface (API) and a GUI for network engineers.  This module aims to leverage the ACI capability and allow engineers to provision Cisco networks using Terraform.
 
-This module will allow you to provision the ACI objects that are most commonly used or deployed in immutable application architectures.
-- [Tenant](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/1-x/Operating_ACI/guide/b_Cisco_Operating_ACI/b_Cisco_Operating_ACI_chapter_0111.html) A high level object that separates one set of resources from another between two separate business groups or clients.
-- [Application Profile Group](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/1-x/Operating_ACI/guide/b_Cisco_Operating_ACI/b_Cisco_Operating_ACI_chapter_0111.html#concept_F4947E22AD2143749DAC34E69F80706F) An object with the purpose of containing one or more EPGs in a logical grouping.
-- [EPG](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/1-x/Operating_ACI/guide/b_Cisco_Operating_ACI/b_Cisco_Operating_ACI_chapter_0111.html#concept_81AC0F90789B454F80E796A7029EFD1E) An object that provides a contract to be consumed by another EPG. Conceptually similar to Kuberenetes service.
-- [Contacts, Subjects, and Filters](https://www.cisco.com/c/en/us/td/docs/switches/datacenter/aci/apic/sw/1-x/Operating_ACI/guide/b_Cisco_Operating_ACI/b_Cisco_Operating_ACI_chapter_01000.html) Contracts are provided by one EPG and consumed by another, and contain multiple subjects, which themselves may contain multiple filters. Filters how ever are not a child object of the contract as they may belong to other contracts, and as such remain their own top level object and are consumed by contracts via a many-to-many relationship with subjects.
+More information on ACI capabilities can be found [here](docs/CISCO-ACI.md).
 
-![ACI Models](docs/aci-models.png)
+## What's a Provider?
 
-## What's a Module?
+Terraform is used to create, manage, and update infrastructure resources such as physical machines, VMs, network switches, containers, and more. Almost any infrastructure type can be represented as a resource in [Terraform](https://www.terraform.io/).
 
-A Module is a canonical, reusable, best-practices definition for how to run a single piece of infrastructure, such
-as a database or server cluster. Each Module is created using [Terraform](https://www.terraform.io/), and
-includes automated tests, examples, and documentation. It is maintained both by the open source community and
-companies that provide commercial support.
-
-Instead of figuring out the details of how to run a piece of infrastructure from scratch, you can reuse
-existing code that has been proven in production. And instead of maintaining all that infrastructure code yourself,
-you can leverage the work of the Module community to pick up infrastructure improvements through
-a version number bump.
+A provider is responsible for understanding API interactions and exposing resources.
 
 
+## Building The Provider
+Clone repository to: `$GOPATH/src/github.com/ignw/terraform-provider-cisco-aci`
 
-## Who maintains this Module?
+```
+$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/ignw/terraform-provider-cisco-aci
+$ git clone git@github.com:terraform-providers/terraform-provider-aws
+```
+
+Enter the provider directory and build the provider
+
+```
+$ cd $GOPATH/src/github.com/ignw/terraform-provider-cisco-aci
+$ make build
+```
+
+## Using the provider
+If you're building the provider, follow the instructions to [install it as a plugin](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin). After placing it into your plugins directory, run terraform init to initialize it.
+
+## Developing the Provider
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org/) installed on your machine (version 1.9+ is required). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+
+To compile the provider, run make build. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+
+```
+$ make build
+...
+$ $GOPATH/bin/terraform-provider-aws
+...
+```
+In order to test the provider, you can simply run `make test`.
+
+Note: Make sure no `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` variables are set, and there's no `[default]` section in the AWS credentials file `~/.aws/credentials`.
+
+$ make test
+In order to run the full suite of Acceptance tests, run `make testacc`.
+
+Note: Acceptance tests create real resources, and often cost money to run.
+
+```
+$ make testacc
+```
+
+## Example Usage
+
+```
+# Configure the Cisco ACI Provider
+provider "aci" {
+  username  = ""
+  password  = ""
+  domain    = ""
+}
+
+# Create a tenant
+resource "aci_tenant" "enterprise" {
+  # ...
+}
+```
+
+## Authentication
+The ACI provider offers a flexible means of providing credentials for authentication. The following methods are supported, in this order, and explained below:
+
+- Static credentials
+- Environment variables
+
+Environment variables
+You can provide your credentials via the `ACI_USERNAME`, `ACI_PASSWORD` and `ACI_DOMAIN` (optional) environment variables.
+
+```
+provider "aci" {}
+```
+
+Usage:
+
+```
+$ export ACI_USERNAME="someuser"
+$ export ACI_PASSWORD="password"
+$ export ACI_DOMAIN="mydomain.com"
+$ terraform plan
+```
+
+## Who maintains this Provider?
 
 This Module is maintained by [IGNW](http://www.ignw.io/). If you're looking for help or commercial
-support, send an email to [support@infogroupnw.com](mailto:support@infogroupnw.com?Subject=Jenkins%20Module).
+support, send an email to [support@infogroupnw.com](mailto:support@infogroupnw.com?Subject=Cisco%20ACI%20Provider).
 IGNW can help with:
 
-* Setup, customization, and support for this Module.
+* Setup, customization, and support for this Provider.
 * Modules for other types of infrastructure, such as VPCs, Docker clusters, databases, and continuous integration.
 * Modules that meet compliance requirements, such as FedRamp, HIPAA.
 * Consulting & Training on AWS, Azure, GCP, Terraform, and DevOps.
 
 
-
 ## Code included in this Module:
 
-* [Cisco Terraform Prodiver](https://github.com/ignw/terraform-provider-cisco-aci/tree/master/terraform-provider-cisco-aci): The module includes Terraform code to deploy a Jenkins master on AWS and setup
+* [Cisco Terraform Provider](https://github.com/ignw/terraform-provider-cisco-aci): The module includes Terraform code to interact with the Cisco ACI API.
 
-## How is this Module versioned?
+## How is this Provider versioned?
 
 This Module follows the principles of [Semantic Versioning](http://semver.org/). You can find each new release,
 along with the changelog, in the [Releases Page](../../releases).
