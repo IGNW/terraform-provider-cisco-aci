@@ -1,4 +1,4 @@
-# aci_contract
+# aci_filter
 
 The Filter resource allows the creation and management of an ACI filters.
 
