@@ -18,9 +18,7 @@ resource "aci_contract" "example" {
 
 # Create filter
 resource "aci_filter" "http" {
-    name = "http-only"
-    protocol = "6"
-    to-port = "80"
+    name = "http-only"    
     ...
 }
 
@@ -42,8 +40,8 @@ resource "aci_endpoint_group" "db" {
 
 The following arguments are supported:
 
-* `name` - (Required) A unique name for the tenant.
-* `alias` - (Optional) The alternate name for the tenant.
+* `name` - (Required) A unique name for the contract.
+* `alias` - (Optional) The alternate name for the contract.
 * `status` - (Required) The tenant status, one of: `created`, `created,modified`, `modified`, `deleted`.  
-* `tags` - (Optional) User defined meta data that can be applied to the tenant.
+* `tags` - (Optional) User defined meta data that can be applied to the contract.
 * `endpoint_groups` - (Required) Endpoint groups assigned to this application profile.
