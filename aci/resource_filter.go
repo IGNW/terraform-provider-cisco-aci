@@ -26,6 +26,12 @@ func resourceCiscoAciFilter() *schema.Resource {
 				Computed: true,
 			},
 
+			"tags": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"entry": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
