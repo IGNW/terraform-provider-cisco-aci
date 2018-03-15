@@ -16,6 +16,7 @@ func resourceCiscoAciFilter() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
+				Required: true,
 			},
 			"alias": &schema.Schema{
 				Type:     schema.TypeString,
@@ -23,7 +24,7 @@ func resourceCiscoAciFilter() *schema.Resource {
 			},
 			"status": &schema.Schema{
 				Type:     schema.TypeString,
-				Computed: true,
+				Required: true,
 			},
 
 			"tags": &schema.Schema{
@@ -42,19 +43,19 @@ func resourceCiscoAciFilter() *schema.Resource {
 							Required: true,
 						},
 
-						"source-from": &schema.Schema{
+						"source_from": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"source_to": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"destination_from": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"source-to": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"destination-from": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"destination-to": &schema.Schema{
+						"destination_to": &schema.Schema{
 							Type:     schema.TypeString,
 							Required: true,
 						},

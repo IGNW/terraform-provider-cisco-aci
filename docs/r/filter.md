@@ -14,16 +14,16 @@ resource "aci_filter" "http" {
     
     entry {
         protocol = "tcp"
-        source-from = "8080"
-        source-to = "8080"
-        destination-from = "80"
-        destination-to = "80"
+        source_from = "8080"
+        source_to = "8080"
+        destination_from = "80"
+        destination_to = "80"
     }
     
     entry {
             protocol = "tcp"
-            destination-from = "443"
-            destination-to = "443"
+            destination_from = "443"
+            destination_to = "443"
     }
 }
 ```
