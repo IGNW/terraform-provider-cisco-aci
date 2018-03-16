@@ -20,7 +20,7 @@ func resourceAciContract() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
-			"subjects": &schema.Schema{
+				"subjects": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},

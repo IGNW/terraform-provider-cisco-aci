@@ -1,6 +1,9 @@
 package aci
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+	"reflect"
+)
 
 func GetBaseSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
@@ -23,4 +26,29 @@ func GetBaseSchema() map[string]*schema.Schema {
 			Elem:     &schema.Schema{Type: schema.TypeString},
 		},
 	}
+}
+
+func (d *AciResource) SetBaseFields(obj interface{}) {
+	fields := []string{"name", "alias", "status", "tags"}
+	original := reflect.ValueOf(obj)
+
+	for _, key := range fields {
+		d.Set(key, original.FieldByName(key).Interface().string())
+	}
+
+	d.SetId(original.FieldByName("name").Interface().(string))
+}
+
+func (d *AciResource) CreateSDKResource(obj interface{}) interface{} {
+	fields := []string{"name", "alias", "status", "tags"}
+	data := reflect.ValueOf(obj)
+
+	for _, key := range fields {
+		data.FieldByName(key).SetString(d.Get(key).(string))
+	}
+	return data
+}
+
+type AciResource struct {
+	*schema.ResourceData
 }

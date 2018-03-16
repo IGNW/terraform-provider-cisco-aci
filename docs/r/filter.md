@@ -11,19 +11,20 @@ resource "aci_filter" "http" {
     alias = "tf-example"    
     status = "created"
     tags = []
-    
-    entry {
-        protocol = "tcp"
-        source_from = "8080"
-        source_to = "8080"
-        destination_from = "80"
-        destination_to = "80"
-    }
-    
-    entry {
+    entries {    
+        entry {
             protocol = "tcp"
-            destination_from = "443"
-            destination_to = "443"
+            source_from = "8080"
+            source_to = "8080"
+            destination_from = "80"
+            destination_to = "80"
+        }
+        
+        entry {
+                protocol = "tcp"
+                destination_from = "443"
+                destination_to = "443"
+        }
     }
 }
 ```
