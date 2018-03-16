@@ -7,15 +7,15 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccCiscoAciFilter_Basic(t *testing.T) {
+func TestAccAciFilter_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCiscoAciFilterConfigBasic,
+				Config: testAccCheckAciFilterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCiscoAciFilterExists("aci_filter.basic"),
+					testAccCheckAciFilterExists("aci_filter.basic"),
 					resource.TestCheckResourceAttr(
 						"aci_filter.basic", "name", "http-basic"),
 					resource.TestCheckResourceAttr(
@@ -25,14 +25,14 @@ func TestAccCiscoAciFilter_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"aci_filter.basic", "tags", ""),
 					resource.TestCheckResourceAttr(
-						"aci_filter.basic", "entry", ""),
+						"aci_filter.basic", "entry.1", ""),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckCiscoAciFilterExists(n string) resource.TestCheckFunc {
+func testAccCheckAciFilterExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		/*
 			client := testAccProvider.Meta().(*aci.Client)
@@ -44,7 +44,7 @@ func testAccCheckCiscoAciFilterExists(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccCheckCiscoAciFilterConfigBasic = `
+const testAccCheckAciFilterConfigBasic = `
 resource "aci_filter" "basic" {
     name = "http-only"
     alias = "tf-example"

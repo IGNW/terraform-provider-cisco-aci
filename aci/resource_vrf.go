@@ -4,6 +4,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceCiscoAciVrf() *schema.Resource {
+func resourceAciVrf() *schema.Resource {
 	return nil
 }
