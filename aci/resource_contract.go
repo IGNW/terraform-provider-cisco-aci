@@ -6,6 +6,8 @@ package aci
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/ignw/cisco-aci-go-sdk/src"
+	"fmt"
 )
 
 func resourceAciContract() *schema.Resource {
@@ -23,9 +25,10 @@ func resourceAciContract() *schema.Resource {
 				"subjects": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
-					Elem:     &schema.Schema{Type: schema.TypeString},
+					Elem: &schema.Resource{
+						Schema: GetBaseSchema(),
+						},
 				},
-
 				"endpoint_groups": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -36,24 +39,100 @@ func resourceAciContract() *schema.Resource {
 	}
 }
 
-func resourceAciContractCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Get("name") == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	contract := resource.CreateSDKResource(&cage.Contract{})
+
+	response, err := client.Contracts.New(contract)
+	if err != nil {
+		return fmt.Errorf("Error creating contract id: %s", contract.name, err)
+	}
+
+	resource.SetBaseFields(response)
+	resource.SetEntries(response.entries)
+	resource.SetSubjects(response.subjects)
+
 	return nil
 }
 
-func resourceAciContractRead(d *schema.ResourceData, m interface{}) error {
+func resourceAciContractRead(d *schema.ResourceData, meta interface{}) error {
 
-	//TODO: replace with client implementation
-	d.Set("name", "http-only")
-	d.Set("alias", "tf-example")
-	d.Set("status", "created")
-	d.Set("tags", "[]")
+	client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Get("name") == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	contract := resource.CreateSDKResource(&cage.Contract{})
+
+	response, err := client.Contracts.Get(contract)
+	if err != nil {
+		return fmt.Errorf("Error creating contract id: %s", contract.name, err)
+	}
+
+	resource.SetBaseFields(response)
+	resource.SetSubjects(response.subjects)
+
 	return nil
 }
 
-func resourceAciContractUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAciContractUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Get("name") == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	contract := resource.CreateSDKResource(&cage.Contract{})
+
+	response, err := client.Contracts.Update(contract)
+	if err != nil {
+		return fmt.Errorf("Error updating contract id: %s", contract.name, err)
+	}
+
+	resource.SetBaseFields(response)
+	resource.SetSubjects(response.subjects)
+
 	return nil
 }
 
-func resourceAciContractDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAciContractDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Get("name") == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	contract := resource.CreateSDKResource(&cage.Contract{})
+
+	response, err := client.Contracts.Delete(contract)
+	if err != nil {
+		return fmt.Errorf("Error deleting contract id: %s", contract.name, err)
+	}
+
+	resource.SetBaseFields(response)
+
 	return nil
+}
+
+func (d *AciResource) SetSubjects(subjects []*cage.Subject) {
+	resources := make([]map[string]interface{}, len(subjects))
+
+	for i, entry := range subjects {
+		resources[i] = entry.ResourceAttributes.ConvertToBaseMap()
+	}
+	d.Set("subjects", resources)
 }

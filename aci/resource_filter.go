@@ -23,7 +23,12 @@ func resourceAciFilter() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
-				"entries": &schma.Schema{
+				"subjects": &schema.Schema{
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+				"entries": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
 					Elem: &schema.Resource{
@@ -82,9 +87,8 @@ func resourceAciFilterCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	resource.SetBaseFields(response)
-
-	//TODO: replace with client implementation
-	d.Set("entry", response.entries)
+	resource.SetEntries(response.entries)
+	resource.SetSubjects(response.subjects)
 
 	return nil
 }
@@ -103,9 +107,8 @@ func resourceAciFilterRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	resource.SetBaseFields(filter)
-
-	//TODO: replace with client implementation
 	resource.SetEntries(filter.entries)
+	resource.SetSubjects(filter.subjects)
 
 	return nil
 }
@@ -127,16 +130,42 @@ func resourceAciFilterUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	resource.SetBaseFields(response)
+	resource.SetEntries(response.entries)
 
 	//TODO: replace with client implementation
-	d.Set("entry", response.entries)
 	d.Set("entry", response.subjects)
 
 	return nil
 }
 
 func resourceAciFilterDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Id() == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	filter := resource.CreateSDKResource(&cage.Filter{})
+
+	response, err := client.Filters.Dlete(filter)
+	if err != nil {
+		return fmt.Errorf("Error creating filter id: %s", filter.name, err)
+	}
+
+	resource.SetBaseFields(response)
+
 	return nil
+}
+
+func (d *AciResource) SetSubjects(items []*cage.Subject) {
+	subjects := make([]string, len(subjects))
+
+	for i, item := range items {
+		subjects[i] = item.Name
+	}
+	d.Set("subjects", subjects)
 }
 
 func (d *AciResource) SetEntries(entries []*cage.Entry) {

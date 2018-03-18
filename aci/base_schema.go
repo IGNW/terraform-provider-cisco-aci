@@ -3,6 +3,7 @@ package aci
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"reflect"
+	"github.com/ignw/cisco-aci-go-sdk/src"
 )
 
 func GetBaseSchema() map[string]*schema.Schema {
@@ -38,6 +39,20 @@ func (d *AciResource) SetBaseFields(obj interface{}) {
 
 	d.SetId(original.FieldByName("name").Interface().(string))
 }
+
+func (obj *cage.ResourceAttributes) ConvertBaseToMap() map[string]interface{} {
+	fields := []string{"name", "alias", "status", "tags"}
+	original := reflect.ValueOf(obj)
+
+	mapResource := make(map[string]interface{})
+
+	for _, key := range fields {
+		mapResource[key] = original.FieldByName(key).Interface().string()
+	}
+
+	return mapResource
+}
+
 
 func (d *AciResource) CreateSDKResource(obj interface{}) interface{} {
 	fields := []string{"name", "alias", "status", "tags"}
