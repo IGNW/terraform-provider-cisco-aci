@@ -5,9 +5,9 @@ package aci
 // TODO: create acceptance tests
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/ignw/cisco-aci-go-sdk/src"
 	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/ignw/cisco-aci-go-sdk"
 )
 
 func resourceAciContract() *schema.Resource {
@@ -27,7 +27,7 @@ func resourceAciContract() *schema.Resource {
 					Optional: true,
 					Elem: &schema.Resource{
 						Schema: GetBaseSchema(),
-						},
+					},
 				},
 				"endpoint_groups": &schema.Schema{
 					Type:     schema.TypeList,
@@ -40,7 +40,7 @@ func resourceAciContract() *schema.Resource {
 }
 
 func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Get("name") == "" {
@@ -48,23 +48,25 @@ func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	contract := resource.CreateSDKResource(&cage.Contract{})
+	// contract := cage.NewContract(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
 
-	response, err := client.Contracts.New(contract)
-	if err != nil {
-		return fmt.Errorf("Error creating contract id: %s", contract.name, err)
-	}
+	/*
+		response, err := client.Contracts.Save(&contract)
+		if err != nil {
+			return fmt.Errorf("Error creating contract id: %s", contract.name, err)
+		}
 
-	resource.SetBaseFields(response)
-	resource.SetEntries(response.entries)
-	resource.SetSubjects(response.subjects)
+		resource.SetBaseFields(response)
+		resource.SetSubjects(response.subjects)
+		resource.SetIdArray("endpoint_groups", response.EPGs)
+	*/
 
 	return nil
 }
 
 func resourceAciContractRead(d *schema.ResourceData, meta interface{}) error {
 
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Get("name") == "" {
@@ -72,21 +74,24 @@ func resourceAciContractRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	contract := resource.CreateSDKResource(&cage.Contract{})
+	/*
+		m := map[string]string{"id": resource.Id()}
+		response, err := client.AppProfiles.Get(&m)
 
-	response, err := client.Contracts.Get(contract)
-	if err != nil {
-		return fmt.Errorf("Error creating contract id: %s", contract.name, err)
-	}
+		if err != nil {
+			return fmt.Errorf("Error creating contract id: %s", resource.Id(), err)
+		}
 
-	resource.SetBaseFields(response)
-	resource.SetSubjects(response.subjects)
+			resource.SetBaseFields(response)
+			resource.SetSubjects(response.subjects)
+			resource.SetIdArray("endpoint_groups", response.EPGs)
+	*/
 
 	return nil
 }
 
 func resourceAciContractUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Get("name") == "" {
@@ -94,21 +99,24 @@ func resourceAciContractUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	contract := resource.CreateSDKResource(&cage.Contract{})
+	// contract := cage.NewContract(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
 
-	response, err := client.Contracts.Update(contract)
-	if err != nil {
-		return fmt.Errorf("Error updating contract id: %s", contract.name, err)
-	}
+	/*
+		response, err := client.Contracts.Save(contract)
+		if err != nil {
+			return fmt.Errorf("Error updating contract id: %s", contract.name, err)
+		}
 
-	resource.SetBaseFields(response)
-	resource.SetSubjects(response.subjects)
+		resource.SetBaseFields(response)
+		resource.SetSubjects(response.subjects)
+		resource.SetIdArray("endpoint_groups", response.EPGs)
+	*/
 
 	return nil
 }
 
 func resourceAciContractDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Get("name") == "" {
@@ -116,14 +124,15 @@ func resourceAciContractDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	contract := resource.CreateSDKResource(&cage.Contract{})
 
-	response, err := client.Contracts.Delete(contract)
-	if err != nil {
-		return fmt.Errorf("Error deleting contract id: %s", contract.name, err)
-	}
+	/*
+		response, err := client.Contracts.Delete(resource.Id())
+		if err != nil {
+			return fmt.Errorf("Error deleting contract id: %s", resource.Id(), err)
+		}
 
-	resource.SetBaseFields(response)
+		resource.SetBaseFields(response)
+	*/
 
 	return nil
 }
@@ -132,7 +141,7 @@ func (d *AciResource) SetSubjects(subjects []*cage.Subject) {
 	resources := make([]map[string]interface{}, len(subjects))
 
 	for i, entry := range subjects {
-		resources[i] = entry.ResourceAttributes.ConvertToBaseMap()
+		resources[i] = d.ConvertToBaseMap(&entry.ResourceAttributes)
 	}
 	d.Set("subjects", resources)
 }

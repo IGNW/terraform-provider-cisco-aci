@@ -1,6 +1,9 @@
 package aci
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+)
 
 func resourceAciTenant() *schema.Resource {
 	return &schema.Resource{
@@ -48,7 +51,27 @@ func resourceAciTenant() *schema.Resource {
 	}
 }
 
-func resourceAciTenantCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAciTenantCreate(d *schema.ResourceData, meta interface{}) error {
+	// client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Get("name") == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	// tenant := cage.NewTenant(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
+
+	/*
+		response, err := client.Tenants.Save(tenant)
+		if err != nil {
+			return fmt.Errorf("Error creating app profile id: %s", tenant.name, err)
+		}
+
+		resource.SetBaseFields(response)
+		resource.SetEndpointGroups(response.EPGs)
+	*/
+
 	return nil
 }
 

@@ -3,7 +3,7 @@ package aci
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/ignw/cisco-aci-go-sdk/src"
+	"github.com/ignw/cisco-aci-go-sdk"
 )
 
 // TODO: update docs
@@ -71,7 +71,7 @@ func resourceAciFilter() *schema.Resource {
 }
 
 func resourceAciFilterCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Get("name") == "" {
@@ -79,42 +79,48 @@ func resourceAciFilterCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	filter := resource.CreateSDKResource(&cage.Filter{})
+	// filter := cage.NewFilter(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
 
-	response, err := client.Filters.New(filter)
-	if err != nil {
-		return fmt.Errorf("Error creating filter id: %s", filter.name, err)
-	}
+	/*
+		response, err := client.Filters.Save(filter)
+		if err != nil {
+			return fmt.Errorf("Error creating filter id: %s", resource.Get("name"), err)
+		}
 
-	resource.SetBaseFields(response)
-	resource.SetEntries(response.entries)
-	resource.SetSubjects(response.subjects)
+		resource.SetBaseFields(response)
+		resource.SetEntries(response.entries)
+		resource.SetIdArray("subjects", response.subjects)
+	*/
 
 	return nil
 }
 
 func resourceAciFilterRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Id() == "" {
 		return fmt.Errorf("Error missing resource identifier")
 	}
 
-	filter, err := client.Filters.Get(resource.Id())
-	if err != nil {
-		return fmt.Errorf("Error retrieving filter id: %s", d.Id(), err)
-	}
+	/*
+		m := map[string]string{"id": resource.Id()}
 
-	resource.SetBaseFields(filter)
-	resource.SetEntries(filter.entries)
-	resource.SetSubjects(filter.subjects)
+		response, err := client.Filters.Get(&m)
+		if err != nil {
+			return fmt.Errorf("Error retrieving filter id: %s", d.Id(), err)
+		}
+
+			resource.SetBaseFields(filter)
+			resource.SetEntries(filter.entries)
+			resource.SetIdArray("subjects", response.subjects)
+	*/
 
 	return nil
 }
 
 func resourceAciFilterUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Id() == "" {
@@ -122,24 +128,24 @@ func resourceAciFilterUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	filter := resource.CreateSDKResource(&cage.Filter{})
+	// filter := cage.NewFilter(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
 
-	response, err := client.Filters.Update(filter)
-	if err != nil {
-		return fmt.Errorf("Error creating filter id: %s", filter.name, err)
-	}
+	/*
+		response, err := client.Filters.Save(filter)
+		if err != nil {
+			return fmt.Errorf("Error creating filter id: %s", resource.Id(), err)
+		}
 
-	resource.SetBaseFields(response)
-	resource.SetEntries(response.entries)
-
-	//TODO: replace with client implementation
-	d.Set("entry", response.subjects)
+		resource.SetBaseFields(response)
+		resource.SetEntries(response.entries)
+		resource.SetIdArray("subjects", response.subjects)
+	*/
 
 	return nil
 }
 
 func resourceAciFilterDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*cage.Client)
+	// client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
 	if resource.Id() == "" {
@@ -147,29 +153,21 @@ func resourceAciFilterDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// TODO: initialize filter instance and set fields
-	filter := resource.CreateSDKResource(&cage.Filter{})
 
-	response, err := client.Filters.Dlete(filter)
-	if err != nil {
-		return fmt.Errorf("Error creating filter id: %s", filter.name, err)
-	}
+	/*
+		response, err := client.Filters.Delete(resource.Id())
+		if err != nil {
+			return fmt.Errorf("Error creating filter id: %s", resource.Id(), err)
+		}
 
-	resource.SetBaseFields(response)
+		resource.SetBaseFields(response)
+	*/
 
 	return nil
 }
 
-func (d *AciResource) SetSubjects(items []*cage.Subject) {
-	subjects := make([]string, len(subjects))
-
-	for i, item := range items {
-		subjects[i] = item.Name
-	}
-	d.Set("subjects", subjects)
-}
-
 func (d *AciResource) SetEntries(entries []*cage.Entry) {
-	resources := make([]map[string]interface{}, len(enries))
+	resources := make([]map[string]interface{}, len(entries))
 
 	for i, entry := range entries {
 		resourceEntry := make(map[string]interface{})
