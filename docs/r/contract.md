@@ -11,9 +11,16 @@ resource "aci_contract" "example" {
     alias = "tf-example"    
     status = "created"
     tags = []
+    tenant_id = "${aci_tenant.my_tenant.id}"
     subject = "http traffic"
     filters = ["${aci.filters.http}"]
     endpoint_groups = ["${aci.endpoint_groups.web.name}", "${aci.endpoint_groups.db.name}"]
+}
+
+# Create tenant
+resource "aci_tenant" "my_tenant" {
+    name = "http-only-tenant"    
+    ...
 }
 
 # Create filter

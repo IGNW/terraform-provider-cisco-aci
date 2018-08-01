@@ -56,6 +56,7 @@ Note: Acceptance tests create real resources, and often cost money to run.
 
 ```
 $ make testacc
+``ACI_URL=https://host:port ACI_USER=admin ACI_PASS=password ACI_ALLOW_INSECURE make testacc
 ```
 
 ## Example Usage

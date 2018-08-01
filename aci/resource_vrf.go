@@ -3,6 +3,7 @@ package aci
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
 func resourceAciVrf() *schema.Resource {
@@ -17,6 +18,18 @@ func resourceAciVrf() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
+				"tenant_id": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"enforce": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"enforcement_direction": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 				"bridge_domains": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -27,95 +40,64 @@ func resourceAciVrf() *schema.Resource {
 	}
 }
 
-func resourceAciVrfCreate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
+func resourceAciVrfFieldMap() map[string]string {
+	return MergeStringMaps(GetBaseFieldMap(),
+		map[string]string{
+			"Enforce":              "enforce",
+			"EnforcementDirection": "enforcement_direction",
+		})
+}
 
-	if resource.Get("name") == "" {
-		return fmt.Errorf("Error missing resource identifier")
+func resourceAciVrfCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+
+	tenant, err := ValidateAndFetchTenant(d, meta)
+
+	if err != nil {
+		return fmt.Errorf("Error creating VRF id: %s", d.Get("name"), err)
 	}
 
-	// TODO: initialize filter instance and set fields
-	// vrf := cage.NewVRF(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
+	vrf := client.VRFs.New(d.Get("name").(string), d.Get("description").(string))
 
-	/*
-		response, err := client.VRFs.Save(vrf)
-		if err != nil {
-			return fmt.Errorf("Error creating VRF id: %s", vrf.name, err)
-		}
+	tenant.AddVRF(vrf)
 
-		resource.SetBaseFields(response)
-		resource.SetIdArray("bridge_domains", response.BridgeDomains)
-	*/
+	dn, err := client.VRFs.Save(vrf)
+
+	if err != nil {
+		return fmt.Errorf("Error creating app profile id: %s", d.Get("name"), err)
+	}
+
+	d.Set("domain_name", dn)
+	d.SetId(dn)
 
 	return nil
 }
 
 func resourceAciVrfRead(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
+	client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
-	if resource.Get("name") == "" {
+	if resource.Id() == "" {
 		return fmt.Errorf("Error missing resource identifier")
 	}
 
-	// TODO: initialize filter instance and set fields
-	/*
-		m := map[string]string{"id": resource.Id()}
+	vrf, err := client.VRFs.Get(resource.Id())
 
-			response, err := client.VRFs.Get(&m)
-			if err != nil {
-				return fmt.Errorf("Error creating VRF id: %s", vrf.name, err)
-			}
+	if err != nil {
+		return fmt.Errorf("Error updating application profile id: %s", resource.Id())
+	}
 
-			resource.SetBaseFields(response)
-			resource.SetIdArray("bridge_domains", response.BridgeDomains)
-	*/
+	resource.MapFields(resourceAciVrfFieldMap(), vrf)
 
 	return nil
 }
 
 func resourceAciVrfUpdate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
-
-	if resource.Id() == "" {
-		return fmt.Errorf("Error missing resource identifier")
-	}
-
-	// TODO: initialize filter instance and set fields
-	// vrf := cage.NewVRF(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
-
-	/*
-		response, err := client.VRFs.Save(vrf)
-		if err != nil {
-			return fmt.Errorf("Error updating VRF id: %s", resource.Id(), err)
-		}
-
-		resource.SetBaseFields(response)
-		resource.SetIdArray("bridge_domains", response.BridgeDomains)
-	*/
-
-	return nil
+	// HACK: currently same implementation as create
+	return resourceAciVrfCreate(d, meta)
 }
 
 func resourceAciVrfDelete(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
-
-	if resource.Id() == "" {
-		return fmt.Errorf("Error missing resource identifier")
-	}
-
-	// TODO: initialize filter instance and set fields
-	/*
-		response, err := client.VRFs.Delete(resource.Id())
-		if err != nil {
-			return fmt.Errorf("Error deleting VRF id: %s", resource.Id(), err)
-		}
-
-		resource.SetBaseFields(response)
-	*/
-
-	return nil
+	client := meta.(*cage.Client)
+	return DeleteAciResource(d, client.VRFs.Delete)
 }

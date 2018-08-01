@@ -7,7 +7,7 @@ package aci
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/ignw/cisco-aci-go-sdk"
+	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
 func resourceAciContract() *schema.Resource {
@@ -22,6 +22,19 @@ func resourceAciContract() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
+				"tenant_id": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"scope": &schema.Schema{
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Represents the scope of this contract. If the scope is set as application-profile, the epg can only communicate with epgs in the same application-profile",
+				},
+				"dscp": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 				"subjects": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -39,104 +52,69 @@ func resourceAciContract() *schema.Resource {
 	}
 }
 
-func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
+func resourceAciContractFieldMap() map[string]string {
+	return MergeStringMaps(GetBaseFieldMap(),
+		map[string]string{
+			"Scope": "scope",
+			"DSCP":  "dscp",
+		})
+}
 
-	if resource.Get("name") == "" {
-		return fmt.Errorf("Error missing resource identifier")
+func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+
+	tenant, err := ValidateAndFetchTenant(d, meta)
+
+	if err != nil {
+		return fmt.Errorf("Error creating contract id: %s", d.Get("name"), err)
 	}
 
-	// TODO: initialize filter instance and set fields
-	// contract := cage.NewContract(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
+	contract := client.Contracts.New(d.Get("name").(string), d.Get("description").(string))
 
-	/*
-		response, err := client.Contracts.Save(&contract)
-		if err != nil {
-			return fmt.Errorf("Error creating contract id: %s", contract.name, err)
-		}
+	tenant.AddContract(contract)
 
-		resource.SetBaseFields(response)
-		resource.SetSubjects(response.subjects)
-		resource.SetIdArray("endpoint_groups", response.EPGs)
-	*/
+	dn, err := client.Contracts.Save(contract)
+
+	if err != nil {
+		return fmt.Errorf("Error creating contract id: %s", d.Get("name"), err)
+	}
+
+	d.Set("domain_name", dn)
+	d.SetId(dn)
 
 	return nil
 }
 
 func resourceAciContractRead(d *schema.ResourceData, meta interface{}) error {
-
-	// client := meta.(*cage.Client)
+	client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
-	if resource.Get("name") == "" {
+	if resource.Id() == "" {
 		return fmt.Errorf("Error missing resource identifier")
 	}
 
-	// TODO: initialize filter instance and set fields
-	/*
-		m := map[string]string{"id": resource.Id()}
-		response, err := client.AppProfiles.Get(&m)
+	contract, err := client.Contracts.Get(resource.Id())
 
-		if err != nil {
-			return fmt.Errorf("Error creating contract id: %s", resource.Id(), err)
-		}
+	if err != nil {
+		return fmt.Errorf("Error updating application profile id: %s", resource.Id())
+	}
 
-			resource.SetBaseFields(response)
-			resource.SetSubjects(response.subjects)
-			resource.SetIdArray("endpoint_groups", response.EPGs)
-	*/
+	resource.MapFields(resourceAciContractFieldMap(), contract)
 
 	return nil
 }
 
 func resourceAciContractUpdate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
-
-	if resource.Get("name") == "" {
-		return fmt.Errorf("Error missing resource identifier")
-	}
-
-	// TODO: initialize filter instance and set fields
-	// contract := cage.NewContract(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
-
-	/*
-		response, err := client.Contracts.Save(contract)
-		if err != nil {
-			return fmt.Errorf("Error updating contract id: %s", contract.name, err)
-		}
-
-		resource.SetBaseFields(response)
-		resource.SetSubjects(response.subjects)
-		resource.SetIdArray("endpoint_groups", response.EPGs)
-	*/
-
-	return nil
+	// HACK: currently same implementation as create
+	return resourceAciContractCreate(d, meta)
 }
 
 func resourceAciContractDelete(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
-
-	if resource.Get("name") == "" {
-		return fmt.Errorf("Error missing resource identifier")
-	}
-
-	// TODO: initialize filter instance and set fields
-
-	/*
-		response, err := client.Contracts.Delete(resource.Id())
-		if err != nil {
-			return fmt.Errorf("Error deleting contract id: %s", resource.Id(), err)
-		}
-
-		resource.SetBaseFields(response)
-	*/
-
-	return nil
+	client := meta.(*cage.Client)
+	return DeleteAciResource(d, client.Contracts.Delete)
 }
 
+/*
 func (d *AciResource) SetSubjects(subjects []*cage.Subject) {
 	resources := make([]map[string]interface{}, len(subjects))
 
@@ -145,3 +123,4 @@ func (d *AciResource) SetSubjects(subjects []*cage.Subject) {
 	}
 	d.Set("subjects", resources)
 }
+*/

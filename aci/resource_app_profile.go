@@ -3,7 +3,7 @@ package aci
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/ignw/cisco-aci-go-sdk"
+	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
 func resourceAciAppProfile() *schema.Resource {
@@ -18,6 +18,12 @@ func resourceAciAppProfile() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
+				"tenant_id": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+			map[string]*schema.Schema{
 				"endpoint_groups": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -28,26 +34,37 @@ func resourceAciAppProfile() *schema.Resource {
 	}
 }
 
-func resourceAciAppProfileCreate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
+func resourceAciAppProfileFieldMap() map[string]string {
 
-	if resource.Get("name") == "" {
-		return fmt.Errorf("Error missing resource identifier")
+	return MergeStringMaps(GetBaseFieldMap(),
+		map[string]string{
+			//HACK: need to fix, this wont work right now
+			// Gonna need to do model.GetParent()....GetPath() or GetDomainName()
+			//"Parent.id": "tenant_id",
+		})
+}
+
+func resourceAciAppProfileCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+
+	tenant, err := ValidateAndFetchTenant(d, meta)
+
+	if err != nil {
+		return fmt.Errorf("Error creating app profile id: %s", d.Get("name"), err)
 	}
 
-	// TODO: initialize filter instance and set fields
-	// appProfile := cage.NewAppProfile(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
+	appProfile := client.AppProfiles.New(d.Get("name").(string), d.Get("description").(string))
 
-	/*
-		response, err := client.AppProfiles.Save(appProfile)
-		if err != nil {
-			return fmt.Errorf("Error creating app profile id: %s", resource.Get("name"), err)
-		}
-	*/
+	tenant.AddAppProfile(appProfile)
 
-	// resource.SetBaseFields(response)
-	// resource.SetIdArray("endpoint_groups", response.EPGs.([]cage.ResourceAttributes))
+	dn, err := client.AppProfiles.Save(appProfile)
+
+	if err != nil {
+		return fmt.Errorf("Error creating app profile id: %s", d.Get("name"), err)
+	}
+
+	d.Set("domain_name", dn)
+	d.SetId(dn)
 
 	return nil
 }
@@ -57,62 +74,27 @@ func resourceAciAppProfileRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*cage.Client)
 	resource := &AciResource{d}
 
-	if resource.Get("name") == "" {
+	if resource.Id() == "" {
 		return fmt.Errorf("Error missing resource identifier")
 	}
 
-	// TODO: initialize filter instance and set fields
-	m := map[string]string{"id": resource.Id()}
+	appProfile, err := client.AppProfiles.Get(resource.Id())
 
-	response, err := client.AppProfiles.Get(&m)
 	if err != nil {
-		return fmt.Errorf("Error creating app profile id: %s", resource.Id(), err)
+		return fmt.Errorf("Error updating application profile id: %s", resource.Id())
 	}
 
-	resource.SetBaseFields(response)
-	// resource.SetIdArray("endpoint_groups", response.EPGs)
+	resource.MapFields(resourceAciAppProfileFieldMap(), appProfile)
 
 	return nil
 }
 
 func resourceAciAppProfileUpdate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
-
-	if resource.Id() == "" {
-		return fmt.Errorf("Error missing resource identifier")
-	}
-
-	// TODO: initialize filter instance and set fields
-	// appProfile := cage.NewAppProfile(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
-
-	/*
-		response, err := client.AppProfiles.Save(appProfile)
-		if err != nil {
-			return fmt.Errorf("Error creating app profile id: %s", resource.Id(), err)
-		}
-
-		resource.SetBaseFields(response)
-		resource.SetIdArray("endpoint_groups", response.EPGs)
-	*/
-
-	return nil
+	// HACK: currently same implementation as create
+	return resourceAciAppProfileCreate(d, meta)
 }
 
 func resourceAciAppProfileDelete(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
-
-	if resource.Id() == "" {
-		return fmt.Errorf("Error missing resource identifier")
-	}
-
-	/*
-		response, err := client.AppProfiles.Delete(resource.Id())
-		if err != nil {
-			return fmt.Errorf("Error creating app profile id: %s", resource.Id(), err)
-		}
-	*/
-
-	return nil
+	client := meta.(*cage.Client)
+	return DeleteAciResource(d, client.AppProfiles.Delete)
 }

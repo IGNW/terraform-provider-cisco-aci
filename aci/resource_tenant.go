@@ -3,6 +3,7 @@ package aci
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
 func resourceAciTenant() *schema.Resource {
@@ -17,10 +18,6 @@ func resourceAciTenant() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
-				"l3_net_identifier": &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
-				},
 				"vrfs": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -52,43 +49,68 @@ func resourceAciTenant() *schema.Resource {
 }
 
 func resourceAciTenantCreate(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*cage.Client)
-	resource := &AciResource{d}
+	client := meta.(*cage.Client)
 
-	if resource.Get("name") == "" {
+	if d.Get("name") == "" {
 		return fmt.Errorf("Error missing resource identifier")
 	}
 
 	// TODO: initialize filter instance and set fields
-	// tenant := cage.NewTenant(resource.Get("name").(string), resource.Get("alias").(string), resource.Get("description").(string))
+	tenant := client.Tenants.New(d.Get("name").(string), d.Get("description").(string))
 
-	/*
-		response, err := client.Tenants.Save(tenant)
-		if err != nil {
-			return fmt.Errorf("Error creating app profile id: %s", tenant.name, err)
-		}
+	dn, err := client.Tenants.Save(tenant)
+	if err != nil {
+		return fmt.Errorf("Error creating tenant id: %s", d.Get("name"))
+	}
 
-		resource.SetBaseFields(response)
-		resource.SetEndpointGroups(response.EPGs)
-	*/
+	d.Set("domain_name", dn)
+	d.SetId(dn)
 
 	return nil
 }
 
-func resourceAciTenantRead(d *schema.ResourceData, m interface{}) error {
+func resourceAciTenantRead(d *schema.ResourceData, meta interface{}) error {
 
-	//TODO: replace with client implementation
-	d.Set("name", "http-only")
-	d.Set("alias", "tf-example")
-	d.Set("status", "created")
-	d.Set("tags", "[]")
+	client := meta.(*cage.Client)
+	resource := &AciResource{d}
+
+	if resource.Id() == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	tenant, err := client.Tenants.Get(resource.Id())
+
+	if err != nil {
+		return fmt.Errorf("Error updating tenant id: %s", resource.Id())
+	}
+
+	// TODO: map collections
+	resource.MapFields(GetBaseFieldMap(), tenant)
+
 	return nil
 }
 
-func resourceAciTenantUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAciTenantUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+
+	if d.Id() == "" {
+		return fmt.Errorf("Error missing resource identifier")
+	}
+
+	// TODO: initialize filter instance and set fields
+	tenant := client.Tenants.New(d.Get("name").(string), d.Get("description").(string))
+
+	_, err := client.Tenants.Save(tenant)
+
+	if err != nil {
+		return fmt.Errorf("Error updating tenant id: %s", d.Id())
+	}
+
 	return nil
 }
 
-func resourceAciTenantDelete(d *schema.ResourceData, m interface{}) error {
-	return nil
+func resourceAciTenantDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*cage.Client)
+	return DeleteAciResource(d, client.Tenants.Delete)
 }

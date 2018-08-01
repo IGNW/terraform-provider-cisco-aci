@@ -3,7 +3,7 @@ package aci
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/ignw/cisco-aci-go-sdk"
+	cage "github.com/ignw/cisco-aci-go-sdk/src/models"
 )
 
 // TODO: update docs
@@ -23,6 +23,10 @@ func resourceAciFilter() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
+				"tenant_id": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+				},
 				"subjects": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -174,8 +178,8 @@ func (d *AciResource) SetEntries(entries []*cage.Entry) {
 		resourceEntry["protocol"] = entry.Protocol
 		resourceEntry["source_from"] = entry.Source.From
 		resourceEntry["source_to"] = entry.Source.To
-		resourceEntry["destination_from"] = entry.Desination.From
-		resourceEntry["destination_to"] = entry.Desination.To
+		resourceEntry["destination_from"] = entry.Destination.From
+		resourceEntry["destination_to"] = entry.Destination.To
 
 		resources[i] = resourceEntry
 	}

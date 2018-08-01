@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -13,13 +14,13 @@ func Provider() terraform.ResourceProvider {
 			"username": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ACI_USERNAME", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ACI_USER", nil),
 				Description: "Username for ACI account.",
 			},
 			"password": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ACI_PASSWORD", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ACI_PASS", nil),
 				Description: "Password for ACI account.",
 			},
 			"url": &schema.Schema{
@@ -27,6 +28,12 @@ func Provider() terraform.ResourceProvider {
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ACI_URL", nil),
 				Description: "Domain for ACI account.",
+			},
+			"allow_insecure": &schema.Schema{
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ACI_ALLOW_INSECURE", nil),
+				Description: "Allow insecure connections for ACI endpoint.",
 			},
 			"domain": &schema.Schema{
 				Type:        schema.TypeString,
@@ -37,7 +44,9 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aci_filter": resourceAciFilter(),
+			"aci_tenant":      resourceAciTenant(),
+			"aci_app_profile": resourceAciAppProfile(),
+			// "aci_filter": resourceAciFilter(),
 		},
 
 		ConfigureFunc: configureClient,
@@ -46,9 +55,11 @@ func Provider() terraform.ResourceProvider {
 
 func configureClient(d *schema.ResourceData) (interface{}, error) {
 	config := AciConfig{
-		Username: d.Get("username").(string),
-		Password: d.Get("password").(string),
-		Domain:   d.Get("domain").(string),
+		Username:      d.Get("username").(string),
+		Password:      d.Get("password").(string),
+		Url:           d.Get("url").(string),
+		Domain:        d.Get("domain").(string),
+		AllowInsecure: d.Get("allow_insecure").(bool),
 	}
 
 	if err := config.validate(); err != nil {
@@ -84,15 +95,14 @@ func (c AciConfig) validate() error {
 }
 
 func (c AciConfig) getAciClient() (interface{}, error) {
-	// *cage.Client
-	//client := aci.NewClient(c.Username, c.Password, c.Domain)
-	//return client,nil
-	return nil, nil
+	client := cage.InitializeClient(c.Url, c.Username, c.Password, c.AllowInsecure)
+	return client, nil
 }
 
 type AciConfig struct {
-	Username string
-	Password string
-	Domain   string
-	Url      string
+	Username      string
+	Password      string
+	Domain        string
+	Url           string
+	AllowInsecure bool
 }

@@ -1,5 +1,6 @@
 package aci
 
+/*
 import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -20,8 +21,6 @@ func TestAccAciFilter_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"aci_filter.basic", "alias", "tf-example"),
 					resource.TestCheckResourceAttr(
-						"aci_filter.basic", "status", "created"),
-					resource.TestCheckResourceAttr(
 						"aci_filter.basic", "tags", ""),
 					resource.TestCheckResourceAttr(
 						"aci_filter.basic", "entry.1", ""),
@@ -33,21 +32,18 @@ func TestAccAciFilter_Basic(t *testing.T) {
 
 func testAccCheckAciFilterExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		/*
 			client := testAccProvider.Meta().(*aci.Client)
 			if err := existsHelper(s, client); err != nil {
 				return err
 			}
-		*/
 		return nil
 	}
 }
-
+*/
 const testAccCheckAciFilterConfigBasic = `
 resource "aci_filter" "basic" {
     name = "http-only"
-    alias = "tf-example"
-    status = "created"
+    alias = "tf-example" 
     tags = []
 
     entry {

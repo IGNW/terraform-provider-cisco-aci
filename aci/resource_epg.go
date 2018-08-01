@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+// TODO: Implement after understanding how to deal with parent child relationship
+
 func resourceAciEpg() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAciEpgCreate,
@@ -17,6 +19,27 @@ func resourceAciEpg() *schema.Resource {
 		Schema: MergeSchemaMaps(
 			GetBaseSchema(),
 			map[string]*schema.Schema{
+
+				"app_profile_id": &schema.Schema{
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"is_attribute_based": &schema.Schema{
+					Type:     schema.TypeBool,
+					Optional: true,
+				},
+				"preferred_policy_control": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"label_match_criteria": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"is_preferred_group_member": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 				"bridge_domains": &schema.Schema{
 					Type:     schema.TypeList,
 					Optional: true,
@@ -25,6 +48,16 @@ func resourceAciEpg() *schema.Resource {
 			},
 		),
 	}
+}
+
+func resourceAciEPGFieldMap() map[string]string {
+	return MergeStringMaps(GetBaseFieldMap(),
+		map[string]string{
+			"IsAttributeBased":       "is_attribute_based",
+			"PreferredPolicyControl": "preferred_policy_control",
+			"LabelMatchCriteria":     "label_match_criteria",
+			"IsPreferredGroupMember": "is_preferred_group_member",
+		})
 }
 
 func resourceAciEpgCreate(d *schema.ResourceData, meta interface{}) error {

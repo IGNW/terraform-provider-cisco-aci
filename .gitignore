@@ -15,3 +15,6 @@
 
 .idea/
 exportToHTML/
+.cookies
+.terraform/
+terraform-provider-aci
