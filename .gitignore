@@ -18,3 +18,4 @@ exportToHTML/
 .cookies
 .terraform/
 terraform-provider-aci
+vendor/

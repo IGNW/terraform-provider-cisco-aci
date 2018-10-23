@@ -2,6 +2,7 @@ package aci
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
@@ -54,7 +55,7 @@ func resourceAciVrfCreate(d *schema.ResourceData, meta interface{}) error {
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
 	if err != nil {
-		return fmt.Errorf("Error creating VRF id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error creating VRF: %s", err.Error())
 	}
 
 	vrf := client.VRFs.New(d.Get("name").(string), d.Get("description").(string))
@@ -64,7 +65,7 @@ func resourceAciVrfCreate(d *schema.ResourceData, meta interface{}) error {
 	dn, err := client.VRFs.Save(vrf)
 
 	if err != nil {
-		return fmt.Errorf("Error creating app profile id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error saving VRF: %s", err.Error())
 	}
 
 	d.Set("domain_name", dn)

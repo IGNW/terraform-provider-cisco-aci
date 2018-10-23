@@ -2,10 +2,11 @@ package aci
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
-	"testing"
 )
 
 func TestAccAciTenant_Basic(t *testing.T) {
@@ -58,6 +59,6 @@ func testAccCheckAciTenantExists(n string) resource.TestCheckFunc {
 const testAccCheckAciTenantConfigBasic = `
 resource "aci_tenant" "basic" {
     name = "IGNW-tenant1"
-    description = "my first tenant"  
+    description = "my first tenant"
 }
 `

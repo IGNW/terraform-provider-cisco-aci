@@ -2,6 +2,7 @@ package aci
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"

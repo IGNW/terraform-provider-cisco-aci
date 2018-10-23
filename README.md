@@ -3,7 +3,8 @@
 This repo contains a terraform provider for deploying networks on Cisco hardware via [Cisco ACI](https://www.cisco.com/c/en/us/solutions/data-center-virtualization/application-centric-infrastructure/index.html).
 
 ## Background
-In modern technology stacks developers and systems engineers find it easy to spin up new networks in the cloud using Terraform. This process is still challenging 
+
+In modern technology stacks developers and systems engineers find it easy to spin up new networks in the cloud using Terraform. This process is still challenging
 in more traditional data centers continues to be cumbersome.  In recent years,  Cisco has release the ACI technology to make the process of setting up and configuring networks simpler and faster. The ACI layer adds
 an Application Programmer's Interface (API) and a GUI for network engineers.  This module aims to leverage the ACI capability and allow engineers to provision Cisco networks using Terraform.
 
@@ -15,26 +16,30 @@ Terraform is used to create, manage, and update infrastructure resources such as
 
 A provider is responsible for understanding API interactions and exposing resources.
 
-
 ## Building The Provider
+
 Clone repository to: `$GOPATH/src/github.com/ignw/terraform-provider-cisco-aci`
 
 ```
-$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/ignw/terraform-provider-cisco-aci
-$ git clone git@github.com:terraform-providers/terraform-provider-aws
+$ mkdir -p cd $GOPATH/src/github.com/ignw; cd $GOPATH/src/github.com/ignw
+$ git clone git@github.com:IGNW/terraform-provider-cisco-aci.git
 ```
 
-Enter the provider directory and build the provider
+Enter the provider directory, install dependencies and build the provider:
 
 ```
 $ cd $GOPATH/src/github.com/ignw/terraform-provider-cisco-aci
+$ make tools
+$ make deps
 $ make build
 ```
 
 ## Using the provider
+
 If you're building the provider, follow the instructions to [install it as a plugin](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin). After placing it into your plugins directory, run terraform init to initialize it.
 
 ## Developing the Provider
+
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org/) installed on your machine (version 1.9+ is required). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 To compile the provider, run make build. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
@@ -42,14 +47,16 @@ To compile the provider, run make build. This will build the provider and put th
 ```
 $ make build
 ...
-$ $GOPATH/bin/terraform-provider-aws
+$ $GOPATH/bin/terraform-provider-cisco-aci
 ...
 ```
+
 In order to test the provider, you can simply run `make test`.
 
-Note: Make sure no `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` variables are set, and there's no `[default]` section in the AWS credentials file `~/.aws/credentials`.
-
+```
 $ make test
+```
+
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
 Note: Acceptance tests create real resources, and often cost money to run.
@@ -76,6 +83,7 @@ resource "aci_tenant" "enterprise" {
 ```
 
 ## Authentication
+
 The ACI provider offers a flexible means of providing credentials for authentication. The following methods are supported, in this order, and explained below:
 
 - Static credentials
@@ -121,8 +129,6 @@ along with the changelog, in the [Releases Page](../../releases).
 During initial development, the major version will be 0 (e.g., `0.x.y`), which indicates the code does not yet have a
 stable API. Once we hit `1.0.0`, we will make every effort to maintain a backwards compatible API and use the MAJOR,
 MINOR, and PATCH versions on each release to indicate any incompatibilities.
-
-
 
 ## License
 

@@ -2,6 +2,7 @@ package aci
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/models"
 )

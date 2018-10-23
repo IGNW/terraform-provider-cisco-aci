@@ -2,6 +2,7 @@ package aci
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
@@ -50,7 +51,7 @@ func resourceAciAppProfileCreate(d *schema.ResourceData, meta interface{}) error
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
 	if err != nil {
-		return fmt.Errorf("Error creating app profile id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error creating app profile: %s", err.Error())
 	}
 
 	appProfile := client.AppProfiles.New(d.Get("name").(string), d.Get("description").(string))
@@ -60,7 +61,7 @@ func resourceAciAppProfileCreate(d *schema.ResourceData, meta interface{}) error
 	dn, err := client.AppProfiles.Save(appProfile)
 
 	if err != nil {
-		return fmt.Errorf("Error creating app profile id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error saving app profile id: %s", err.Error())
 	}
 
 	d.Set("domain_name", dn)
