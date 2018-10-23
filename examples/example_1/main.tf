@@ -5,7 +5,7 @@ provider "aci" {
   allow_insecure = true
 }
 
-resource "aci_tenant" "basic" {
-  name = "IGNW-tenant1"
-  description = "my first tenant"
+resource "aci_tenant" "tennant_1" {
+  name = "ignw-tenant-1"
+  description = "IGNW Tennant 1"
 }
