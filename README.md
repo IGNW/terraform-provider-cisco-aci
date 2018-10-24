@@ -54,7 +54,7 @@ To compile the provider, run make build. This will build the provider and put th
 ```
 $ make build
 ...
-$ $GOPATH/bin/terraform-provider-cisco-aci
+$ $GOPATH/bin/terraform-provider-aci
 ...
 ```
 
