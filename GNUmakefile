@@ -10,7 +10,7 @@ deps:
 	@dep ensure
 
 build: fmtcheck
-	go install
+	go build -i -o $(GOPATH)/bin/terraform-provider-aci
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1

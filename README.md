@@ -4,9 +4,8 @@ This repo contains a terraform provider for deploying networks on Cisco hardware
 
 ## Background
 
-In modern technology stacks developers and systems engineers find it easy to spin up new networks in the cloud using Terraform. This process is still challenging
-in more traditional data centers continues to be cumbersome.  In recent years,  Cisco has release the ACI technology to make the process of setting up and configuring networks simpler and faster. The ACI layer adds
-an Application Programmer's Interface (API) and a GUI for network engineers.  This module aims to leverage the ACI capability and allow engineers to provision Cisco networks using Terraform.
+In modern technology stacks developers and systems engineers find it easy to spin up new networks in the cloud using Terraform. This process is still challenging in more traditional data centers continues to be cumbersome. In recent years, Cisco has released the ACI technology to make the process of setting up and configuring networks simpler and faster. The ACI layer adds
+an Application Programmer's Interface (API) and a GUI for network engineers. This module aims to leverage the ACI capability and allow engineers to provision Cisco networks using Terraform.
 
 More information on ACI capabilities can be found [here](docs/CISCO-ACI.md).
 
@@ -36,7 +35,15 @@ $ make build
 
 ## Using the provider
 
-If you're building the provider, follow the instructions to [install it as a plugin](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin). After placing it into your plugins directory, run terraform init to initialize it.
+If you're building the provider, follow the instructions to [install it as a plugin](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin). After placing it into your plugins directory, run `terraform init` in the folder where you have your `.tf` files to initialize it.
+
+For example:
+
+```
+mkdir -p ~/.terraform.d/plugins/linux_amd64
+cp $GOPATH/bin/terraform-provider-aci ~/.terraform.d/plugins/linux_amd64/
+terraform init -plugin-dir ~/.terraform.d/plugins/linux_amd64
+```
 
 ## Developing the Provider
 
@@ -53,11 +60,7 @@ $ $GOPATH/bin/terraform-provider-cisco-aci
 
 In order to test the provider, you can simply run `make test`.
 
-```
-$ make test
-```
-
-In order to run the full suite of Acceptance tests, run `make testacc`.
+In order to run the full suite of acceptance tests, run `make testacc`.
 
 Note: Acceptance tests create real resources, and often cost money to run.
 
@@ -81,6 +84,8 @@ resource "aci_tenant" "enterprise" {
   # ...
 }
 ```
+
+In the `examples` folder you can find complete working examples.
 
 ## Authentication
 
@@ -115,7 +120,6 @@ IGNW can help with:
 * Modules for other types of infrastructure, such as VPCs, Docker clusters, databases, and continuous integration.
 * Modules that meet compliance requirements, such as FedRamp, HIPAA.
 * Consulting & Training on AWS, Azure, GCP, Terraform, and DevOps.
-
 
 ## Code included in this Module:
 

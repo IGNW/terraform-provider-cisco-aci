@@ -6,6 +6,6 @@ provider "aci" {
 }
 
 resource "aci_tenant" "tennant_1" {
-  name = "ignw-tenant-1"
+  name        = "ignw-tenant-1"
   description = "IGNW Tennant 1"
 }
