@@ -15,48 +15,33 @@ Terraform is used to create, manage, and update infrastructure resources such as
 
 A provider is responsible for understanding API interactions and exposing resources.
 
-## Building The Provider
+## Building the Provider
 
 Clone repository to: `$GOPATH/src/github.com/ignw/terraform-provider-cisco-aci`
 
 ```
-$ mkdir -p cd $GOPATH/src/github.com/ignw; cd $GOPATH/src/github.com/ignw
+$ mkdir -p $GOPATH/src/github.com/ignw
+$ cd $GOPATH/src/github.com/ignw
 $ git clone git@github.com:IGNW/terraform-provider-cisco-aci.git
 ```
 
-Enter the provider directory, install dependencies and build the provider:
+Enter the provider directory, install tools and project dependencies:
 
 ```
 $ cd $GOPATH/src/github.com/ignw/terraform-provider-cisco-aci
 $ make tools
 $ make deps
-$ make build
 ```
 
-## Using the provider
-
-If you're building the provider, follow the instructions to [install it as a plugin](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin). After placing it into your plugins directory, run `terraform init` in the folder where you have your `.tf` files to initialize it.
-
-For example:
-
-```
-mkdir -p ~/.terraform.d/plugins/linux_amd64
-cp $GOPATH/bin/terraform-provider-aci ~/.terraform.d/plugins/linux_amd64/
-terraform init -plugin-dir ~/.terraform.d/plugins/linux_amd64
-```
-
-## Developing the Provider
-
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org/) installed on your machine (version 1.9+ is required). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
-
-To compile the provider, run make build. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+Build the provider:
 
 ```
 $ make build
-...
-$ $GOPATH/bin/terraform-provider-aci
-...
 ```
+
+If the build process ends successfully, the provider binary will be generated in the following path: `$GOPATH/bin/terraform-provider-aci`
+
+## Testing the Provider
 
 In order to test the provider, you can simply run `make test`.
 
@@ -69,33 +54,51 @@ $ make testacc
 ``ACI_URL=https://host:port ACI_USER=admin ACI_PASS=password ACI_ALLOW_INSECURE make testacc
 ```
 
-## Example Usage
+## Using the Provider
+
+If you're building the provider, follow the instructions to [install it as a plugin](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin). After placing it into your plugins directory, run `terraform init` in the folder where you have your `.tf` files to initialize it.
+
+For example:
 
 ```
-# Configure the Cisco ACI Provider
-provider "aci" {
-  username  = ""
-  password  = ""
-  domain    = ""
-}
-
-# Create a tenant
-resource "aci_tenant" "enterprise" {
-  # ...
-}
+mkdir -p ~/.terraform.d/plugins/linux_amd64
+cp $GOPATH/bin/terraform-provider-aci ~/.terraform.d/plugins/linux_amd64/
+cd examples/example_1
+terraform init -plugin-dir ~/.terraform.d/plugins/linux_amd64
+terraform plan
+terraform apply
 ```
-
-In the `examples` folder you can find complete working examples.
 
 ## Authentication
 
-The ACI provider offers a flexible means of providing credentials for authentication. The following methods are supported, in this order, and explained below:
+The ACI provider offers a flexible way of providing credentials for authentication. The following methods are supported, in this order, and explained below:
 
 - Static credentials
 - Environment variables
 
-Environment variables
-You can provide your credentials via the `ACI_USERNAME`, `ACI_PASSWORD` and `ACI_DOMAIN` (optional) environment variables.
+### Static credentials
+
+You can provide your credentials using the aci provider parameters in the terraform file.
+
+```
+provider "aci" {
+  url            = "https://host:port"
+  username       = "user"
+  password       = "password"
+  allow_insecure = true
+  domain         = "mydomain.com"
+}
+```
+
+Usage:
+
+```
+$ terraform plan
+```
+
+### Environment variables
+
+You can provide your credentials via the `ACI_URL`, `ACI_USER`, `ACI_PASS`, `ACI_ALLOW_INSECURE` and `ACI_DOMAIN` (optional) environment variables.
 
 ```
 provider "aci" {}
@@ -104,8 +107,10 @@ provider "aci" {}
 Usage:
 
 ```
-$ export ACI_USERNAME="someuser"
-$ export ACI_PASSWORD="password"
+$ export ACI_URL="https://host:port"
+$ export ACI_USER="user"
+$ export ACI_PASS="password"
+$ export ACI_ALLOW_INSECURE=true
 $ export ACI_DOMAIN="mydomain.com"
 $ terraform plan
 ```

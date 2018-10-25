@@ -45,11 +45,11 @@ func testAccCheckAciTenantExists(n string) resource.TestCheckFunc {
 		tenant, err := client.Tenants.Get(id)
 
 		if err != nil {
-			return fmt.Errorf("Error retreiving tenant id: %s", id)
+			return fmt.Errorf("Error retrieving tenant id: %s", id)
 		}
 
 		if tenant == nil {
-			return fmt.Errorf("Error retreiving tenant id: %s", id)
+			return fmt.Errorf("Error retrieving tenant id: %s", id)
 		}
 
 		return nil
