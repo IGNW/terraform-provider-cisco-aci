@@ -2,6 +2,7 @@ package aci
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
@@ -117,12 +118,12 @@ func resourceAciBridgeDomainFieldMap() map[string]string {
 			"LimitIpToSubnets":         "limit_ip_to_subnets",
 			"LLIpAddress":              "ll_ip_address",
 			"MAC":                      "mac",
-			"MultiDestForwarding": "multi_dest_forwarding",
-			"Multicast":           "multicast",
-			"UnicastRoute":        "unicast_route",
-			"UnknownUnicastMAC":   "unknown_unicast_mac",
-			"UnknownMulticastMAC": "unknown_multicast_mac",
-			"VirtualMAC":          "virtual_mac",
+			"MultiDestForwarding":      "multi_dest_forwarding",
+			"Multicast":                "multicast",
+			"UnicastRoute":             "unicast_route",
+			"UnknownUnicastMAC":        "unknown_unicast_mac",
+			"UnknownMulticastMAC":      "unknown_multicast_mac",
+			"VirtualMAC":               "virtual_mac",
 		})
 }
 
@@ -132,7 +133,7 @@ func resourceAciBridgeDomainCreate(d *schema.ResourceData, meta interface{}) err
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
 	if err != nil {
-		return fmt.Errorf("Error creating bridge domain id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error creating bridge domain: %s", err.Error())
 	}
 
 	bridgeDomain := client.BridgeDomains.New(d.Get("name").(string), d.Get("description").(string))
@@ -142,7 +143,7 @@ func resourceAciBridgeDomainCreate(d *schema.ResourceData, meta interface{}) err
 	dn, err := client.BridgeDomains.Save(bridgeDomain)
 
 	if err != nil {
-		return fmt.Errorf("Error creating bridge domain id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error saving bridge domain: %s", err.Error())
 	}
 
 	d.Set("domain_name", dn)

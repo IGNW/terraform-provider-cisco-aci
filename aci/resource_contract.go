@@ -6,6 +6,7 @@ package aci
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
@@ -66,7 +67,7 @@ func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
 	if err != nil {
-		return fmt.Errorf("Error creating contract id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error creating contract: %s", err.Error())
 	}
 
 	contract := client.Contracts.New(d.Get("name").(string), d.Get("description").(string))
@@ -76,7 +77,7 @@ func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
 	dn, err := client.Contracts.Save(contract)
 
 	if err != nil {
-		return fmt.Errorf("Error creating contract id: %s", d.Get("name"), err)
+		return fmt.Errorf("Error saving contract: %s", err.Error())
 	}
 
 	d.Set("domain_name", dn)

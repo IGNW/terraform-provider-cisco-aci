@@ -2,10 +2,11 @@ package aci
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
-	"testing"
 )
 
 func TestAccAciTenant_Basic(t *testing.T) {
@@ -44,11 +45,11 @@ func testAccCheckAciTenantExists(n string) resource.TestCheckFunc {
 		tenant, err := client.Tenants.Get(id)
 
 		if err != nil {
-			return fmt.Errorf("Error retreiving tenant id: %s", id)
+			return fmt.Errorf("Error retrieving tenant id: %s", id)
 		}
 
 		if tenant == nil {
-			return fmt.Errorf("Error retreiving tenant id: %s", id)
+			return fmt.Errorf("Error retrieving tenant id: %s", id)
 		}
 
 		return nil
@@ -58,6 +59,6 @@ func testAccCheckAciTenantExists(n string) resource.TestCheckFunc {
 const testAccCheckAciTenantConfigBasic = `
 resource "aci_tenant" "basic" {
     name = "IGNW-tenant1"
-    description = "my first tenant"  
+    description = "my first tenant"
 }
 `
