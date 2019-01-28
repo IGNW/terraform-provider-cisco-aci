@@ -43,7 +43,7 @@ func testAccCheckAciFilterExists(n string) resource.TestCheckFunc {
 const testAccCheckAciFilterConfigBasic = `
 resource "aci_filter" "basic" {
     name = "http-only"
-    alias = "tf-example" 
+    alias = "tf-example"
     tags = []
 
     entry {

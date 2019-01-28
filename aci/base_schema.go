@@ -2,10 +2,11 @@ package aci
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	models "github.com/ignw/cisco-aci-go-sdk/src/models"
 	service "github.com/ignw/cisco-aci-go-sdk/src/service"
-	"reflect"
 )
 
 func GetBaseSchema() map[string]*schema.Schema {
