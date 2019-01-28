@@ -10,8 +10,13 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+.cookies
+exportToHTML
+Gopkg*
 .idea/
 vendor/
 .terraform/
 examples/**/*.tfstate
 examples/**/*.tfstate.backup
+
+terraform-provider-aci

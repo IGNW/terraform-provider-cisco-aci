@@ -1,7 +1,7 @@
 provider "aci" {
-  url            = "https://sandboxapicdc.cisco.com"
+  url            = "https://url:port"
   username       = "admin"
-  password       = "ciscopsdt"
+  password       = "password"
   allow_insecure = true
 }
 
