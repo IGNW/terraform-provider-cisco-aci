@@ -9,31 +9,31 @@ import (
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
-//TODO: Add advanced test cases to cover setting properties and EPGs
+//TODO: Add advanced test cases to cover setting properties and Bridge Domains
 
-func TestAccAciBridgeDomain_Basic(t *testing.T) {
+func TestAccAciVrf_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAciBridgeDomainDestroy,
+		CheckDestroy: testAccCheckAciVrfDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAciBridgeDomainConfigBasic,
+				Config: testAccCheckAciVrfConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAciBridgeDomainExists("aci_bridge_domain.basic"),
+					testAccCheckAciVrfExists("aci_vrf.basic"),
 					resource.TestCheckResourceAttr(
-						"aci_bridge_domain.basic", "name", "bd1"),
+						"aci_vrf.basic", "name", "vrf1"),
 					resource.TestCheckResourceAttr(
-						"aci_bridge_domain.basic", "description", "terraform test bridge domain"),
+						"aci_vrf.basic", "description", "terraform test VRF"),
 					resource.TestCheckResourceAttr(
-						"aci_bridge_domain.basic", "domain_name", "uni/tn-IGNW-tenant1/BD-bd1"),
+						"aci_vrf.basic", "domain_name", "uni/tn-IGNW-tenant1/ctx-vrf1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckAciBridgeDomainExists(n string) resource.TestCheckFunc {
+func testAccCheckAciVrfExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*cage.Client)
 
@@ -45,22 +45,22 @@ func testAccCheckAciBridgeDomainExists(n string) resource.TestCheckFunc {
 
 		id := rs.Primary.Attributes["id"]
 
-		bd, err := client.BridgeDomains.Get(id)
+		vrf, err := client.VRFs.Get(id)
 
-		if err != nil || bd == nil {
-			return fmt.Errorf("Error retreiving bridge domain id: %s", id)
+		if err != nil || vrf == nil {
+			return fmt.Errorf("Error retreiving vrf id: %s", id)
 		}
 
 		return nil
 	}
 }
 
-func testAccCheckAciBridgeDomainDestroy(state *terraform.State) error {
+func testAccCheckAciVrfDestroy(state *terraform.State) error {
 
 	client := testAccProvider.Meta().(*cage.Client)
 
-	err := checkDestroy("aci_bridge_domain.basic", state, func(s string) (interface{}, error) {
-		return client.BridgeDomains.Get(s)
+	err := checkDestroy("aci_vrf.basic", state, func(s string) (interface{}, error) {
+		return client.VRFs.Get(s)
 	})
 
 	if err != nil {
@@ -78,16 +78,15 @@ func testAccCheckAciBridgeDomainDestroy(state *terraform.State) error {
 	return nil
 }
 
-const testAccCheckAciBridgeDomainConfigBasic = `
+const testAccCheckAciVrfConfigBasic = `
 resource "aci_tenant" "basic" {
     name = "IGNW-tenant1"
     description = "my first tenant"
 }
 
-resource "aci_bridge_domain" "basic" {
-	name = "bd1"
-	description = "terraform test bridge domain"
-	tenant_id = "${aci_tenant.basic.id}"
-	type = "regular"
+resource "aci_vrf" "basic" {
+	name = "vrf1"
+	description = "terraform test VRF"
+	tenant_id = "${aci_tenant.basic.id}"	
 }
 `

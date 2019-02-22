@@ -45,9 +45,12 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"aci_tenant":      resourceAciTenant(),
-			"aci_app_profile": resourceAciAppProfile(),
-			// "aci_filter": resourceAciFilter(),
+			"aci_tenant":        resourceAciTenant(),
+			"aci_app_profile":   resourceAciAppProfile(),
+			"aci_bridge_domain": resourceAciBridgeDomain(),
+			"aci_contract":      resourceAciContract(),
+			"aci_filter":        resourceAciFilter(),
+			"aci_vrf":           resourceAciVrf(),
 		},
 
 		ConfigureFunc: configureClient,

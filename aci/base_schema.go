@@ -26,6 +26,25 @@ func GetBaseSchema() map[string]*schema.Schema {
 	}
 }
 
+func (d *AciResource) MapFieldsToAci(fields map[string]string, obj interface{}) {
+
+	original := reflect.ValueOf(obj).Elem()
+
+	for sourceField, destField := range fields {
+		dest := d.Get(destField)
+		source := original.FieldByName(sourceField)
+
+		if reflect.TypeOf(dest).Kind() == reflect.Bool {
+			source.SetBool(dest.(bool))
+		} else if reflect.TypeOf(dest).Kind() == reflect.String {
+			source.SetString(dest.(string))
+		}
+
+	}
+
+	d.SetId(original.FieldByName("DomainName").Interface().(string))
+}
+
 func (d *AciResource) MapFields(fields map[string]string, obj interface{}) {
 
 	original := reflect.Indirect(reflect.ValueOf(obj))

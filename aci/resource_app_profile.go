@@ -2,7 +2,6 @@ package aci
 
 import (
 	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
@@ -37,16 +36,21 @@ func resourceAciAppProfile() *schema.Resource {
 
 func resourceAciAppProfileFieldMap() map[string]string {
 
+	/*
+		return MergeStringMaps(GetBaseFieldMap(),
+			map[string]string{
+				//HACK: need to fix, this wont work right now
+				// Gonna need to do model.GetParent()....GetPath() or GetDomainName()
+				//"Parent.id": "tenant_id",
+			})
+	*/
 	return MergeStringMaps(GetBaseFieldMap(),
-		map[string]string{
-			//HACK: need to fix, this wont work right now
-			// Gonna need to do model.GetParent()....GetPath() or GetDomainName()
-			//"Parent.id": "tenant_id",
-		})
+		map[string]string{})
 }
 
 func resourceAciAppProfileCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*cage.Client)
+	resource := &AciResource{d}
 
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
@@ -54,7 +58,9 @@ func resourceAciAppProfileCreate(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating app profile: %s", err.Error())
 	}
 
-	appProfile := client.AppProfiles.New(d.Get("name").(string), d.Get("description").(string))
+	appProfile := client.AppProfiles.New(resource.Get("name").(string), resource.Get("description").(string))
+
+	resource.MapFieldsToAci(resourceAciAppProfileFieldMap(), appProfile)
 
 	tenant.AddAppProfile(appProfile)
 
