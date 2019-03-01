@@ -1,5 +1,27 @@
 language: go
-script:
-- go fmt ./
+go:
+- 1.10.x
+before_install:
+- find $GOPATH/src/github.com/ -depth -exec rename 's/(.*)\/([^\/]*)/$1\/\L$2/' {}
+  \;
+after_install:
+- find $GOPATH/src/github.com/ -depth -exec rename 's/(.*)\/([^\/]*)/$1\/\L$2/' {}
+  \;
+stages:
+- compile
+- name: acceptance
+  if: branch = master OR type = pull_request
+jobs:
+  include:
+  - stage: compile
+    script: make
+  - stage: acceptance
+    script: make testacc
 notifications:
   slack: ignw:IxpMZ19gbbzU0vAM2SjvGtFx
+env:
+  global:
+  - secure: tUK+EjZ8EBqpWTeC3DFqBllXaJf+nw7t+V5apn0CfY/1/ZboEwkvhQ/N2DhmcldT4qXNh24Or4H1VlWyqhp4KL/mf3XBqm306E30g8XVegwItJlyWY8GGY7QtYWF4hDsFI0mhzWNWSgrSkQiefo1sBQ/YcFNfjuRGiLE/NPEKEm8XVTtQ4BLqAi/hSo4gj9Qwrc0iQodtVkjECfDaF0kdzNQ3642xLvNXElWHx7tLLGFZqmJfxSnLEfXn6wmFd5VnddO8YNE0sJu/WawFy5Emvrwh+93mzXbZN3QH/khsnn9LeBnijmFw5iZuXDhqdK/VY9UZhb6kU22QZ4tixqpX/pCfINYDPfPYAcvi+LERyWlZNJ9+iX94bCAhQf9KoNN9slSrQBkaMaTh1mTJ89CIvbNDw1r1T7cak9K8o/5pRNWRiN5m8q/NjXZIvzQRybvqH73sly0RqfXxxgXgnmNuAZr/u+H5f6ZqtXGP9W3XdrlSSuTUjHRMf3z3YE+WVvym3ybOre+kR/Jz8QFVWXMTDNhsxPOp47VpJtOhoDRV/UxX7xjaiRDWnpPvAGXWEl2lSs7IfNSB1OLptEvHtPGdkqP8QDpMCtqCLvKYf32H7nWulS+I91UyX8SaFMDxfvvyf0VM3oOU6SuU6b23b/CyVE5yRoNgsADLWn99Hlm+EA=
+  - secure: SftAxjyF/rkWVBVK2FEatXKMKFrvGiQ5y2IdIGyA2qFwJVQ2Axx+zBNdnCbvejI2APDuQfo4/0tCzCmW2LI08msq0hbP6wZAQrY9W33njqlvpezo1edFEHUQZZyGEW16TImbyeHQx2O9H3cI+XkMETF02p9Bg7lrFzhhs4STuFk5iINK1rICJnSQwzd5r81ygXlkarD3SPgRE4Vd/fNZsoDAND4GuLPDPyX7FV2KxqLmF2PO17QsjJ8ZvF6+OoY65CV8osEN3OX+e9/0XUVDXVJDTa4QUC4WUjki9ItaHjTIxRO/aw26EQKlai/0x43lG0YlGMbSlnIuZd0zduAQJQIzNiTSkKLJPCRgPZY1/BogB1078dww9wwI0mhOBSs5KbqiWv8vNedEakwWNjaa2TsdyM2bM0sBCOmd+Sf4AMeWPpIhamWKNaJK8/SMDWKnwn68EKXcs/jdQieHZl86w9+HxoTMBjxd3E4TUW81anqJdhsnspmzUCMBZ0x1r/YfTAEA7kfuir6nnsKQxOy3fV+rg8PdKjrnjyxmLUaQkBVr58gdaXsbsyHitUh9XYKqhODiM8PfqfmSoPfjnu89/OPPxudSA3VBd4ZfpyGQFdIX79ZmYL+bwof7rL/h7n0B4XRXyqz5C9LcnoNltzg2nAcRLtSyJ/cE/sqD+PuJOrg=
+  - secure: dwm45OYlDbSzfq9Raapi1odfF3qRQZO9wGTXFswWDTvjshvB8JkvUBy7wM71WrK9H4BVNzqgL480ApU/lZi4Mew5xngJ6W3nZ3kUlbacb6uyBJJNdaeUFktzGW0oSL/Mz/HwAby0ctOQXoedF0hXP2kfSDhpLmWfAQH17sb8MxMynXJCaaKPWNvW7+4SWGiyp274qEXiwaMwSi6y0sQJJNKSfFFhJE1nfpC6Oe3jChf7xq2IqhKno9XJDMv4EJs7abrK3yPVntokctKteijemRJ77DnYwCRL1aw8ZuN/3chGb+/mrSppAnQr8nQOgImJ4uQY4JMtNnTSdlPxLJJAjAFrXn6dzy5A6J2WTVPT+M0OHmbuRWp/BDhD/A8ld2OcBBS/ZWsTg3Y99W6TcGvOUmLCxia7B2o61M79pGjFNq1bQi9BkEi7pHMaDWWfW3Sv8AFeBr5lH6J86R4R3IRPfBioO9acFNGUY+RXKZRqv1bqBH18FDUY2/jaUNrUf52ZbRAwkrVE805b5nCqdahKCaNFq0PTbY4yb4gXqNUfeVDYEmq/XvEypDbpBXcfi3I6rhj4axTQ2umYCfGY1UJ+RE7APEnQHj8wLHIJjQp355vgBS1DZ7R6O06ks1/fInOakjvd69isemJ+twrPgZ/QyUgjQZcLIU1oOPnVTyAJZHo=
+  - secure: aavOl95fUkoYcHjCacGhiA2fdJ9iYIGlF0Z0XyOIx/krhUVWWf8NYIM8WuMCKvSoNCNFhdoHh7L90bK42ke7Ei9zmGtwhy4vj8xE08ZeAiBe7QhkAM2S3k65jS0mLgaP1TJsPBpGQOnQS9cNPPrFPQsMhaLC6CWtE2szJw/94wDuoNv/JYybqO1NC1flmCEr8CxEmpjbhBUUrXqkNdGgJMe1RKs181juxwQkOY4PUMR0M188RK2M6s1Ri+0ETutUz3TN1GAoDMzQu3DKJ2illIf5NDHmaU7QYXkKSqI/Z1KoCtehDtWA6+7aCTYZ0axp1yDjzH9+KqhJ1HJmN1sd7yE3p0P9xcWroWAp7kxP5r8/ML7bU5/D0Wj+4oz1QQiEbdQT8Uf94qASDmlYIhEyE0avuPXzHbeI9IMYjoePXGhtfFZEpz6aPDrJU3PL4ko+HA8Ahu5BBa8RXs/Dra3ss1QUD7Ndglbp8pu5XsDvIIWUYTZen6pRKusmDfGqBKk45Z8el7Ld2U1SknvVTbo2PRn5jpVvutEJzYtAxS82bJCF3LYPi8JM8oVP+FLYwUu3K4QY/wY9bPON6XfKvIitxnYrs4oTgS6Otyq5nwa2Sh5zWVkEGD8wqHeAvwdu2q+18kYJv4SWHD0S2Mg4FxmwQQ8XrDXyDoqT0JOsWpA+zPo=

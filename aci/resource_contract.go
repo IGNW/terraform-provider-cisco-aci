@@ -14,9 +14,9 @@ import (
 func resourceAciContract() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAciContractCreate,
-		Update: resourceAciFilterUpdate,
-		Read:   resourceAciFilterRead,
-		Delete: resourceAciFilterDelete,
+		Update: resourceAciContractUpdate,
+		Read:   resourceAciContractRead,
+		Delete: resourceAciContractDelete,
 
 		SchemaVersion: 1,
 
@@ -31,10 +31,12 @@ func resourceAciContract() *schema.Resource {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Description: "Represents the scope of this contract. If the scope is set as application-profile, the epg can only communicate with epgs in the same application-profile",
+					Default:     "context",
 				},
 				"dscp": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "unspecified",
 				},
 				"subjects": &schema.Schema{
 					Type:     schema.TypeList,
@@ -63,6 +65,7 @@ func resourceAciContractFieldMap() map[string]string {
 
 func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*cage.Client)
+	resource := &AciResource{d}
 
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
@@ -70,7 +73,9 @@ func resourceAciContractCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating contract: %s", err.Error())
 	}
 
-	contract := client.Contracts.New(d.Get("name").(string), d.Get("description").(string))
+	contract := client.Contracts.New(resource.Get("name").(string), resource.Get("description").(string))
+
+	resource.MapFieldsToAci(resourceAciContractFieldMap(), contract)
 
 	tenant.AddContract(contract)
 
@@ -97,7 +102,7 @@ func resourceAciContractRead(d *schema.ResourceData, meta interface{}) error {
 	contract, err := client.Contracts.Get(resource.Id())
 
 	if err != nil {
-		return fmt.Errorf("Error updating application profile id: %s", resource.Id())
+		return fmt.Errorf("Error reading contract id: %s", resource.Id())
 	}
 
 	resource.MapFields(resourceAciContractFieldMap(), contract)

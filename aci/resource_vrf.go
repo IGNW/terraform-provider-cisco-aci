@@ -7,6 +7,8 @@ import (
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
 
+//TODO: Add advanced test cases to cover setting properties and bridge domains
+
 func resourceAciVrf() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAciVrfCreate,
@@ -26,10 +28,12 @@ func resourceAciVrf() *schema.Resource {
 				"enforce": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "unenforced",
 				},
 				"enforcement_direction": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "ingress",
 				},
 				"bridge_domains": &schema.Schema{
 					Type:     schema.TypeList,
@@ -51,6 +55,7 @@ func resourceAciVrfFieldMap() map[string]string {
 
 func resourceAciVrfCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*cage.Client)
+	resource := &AciResource{d}
 
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
@@ -58,7 +63,9 @@ func resourceAciVrfCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating VRF: %s", err.Error())
 	}
 
-	vrf := client.VRFs.New(d.Get("name").(string), d.Get("description").(string))
+	vrf := client.VRFs.New(resource.Get("name").(string), resource.Get("description").(string))
+
+	resource.MapFieldsToAci(resourceAciVrfFieldMap(), vrf)
 
 	tenant.AddVRF(vrf)
 
@@ -85,7 +92,7 @@ func resourceAciVrfRead(d *schema.ResourceData, meta interface{}) error {
 	vrf, err := client.VRFs.Get(resource.Id())
 
 	if err != nil {
-		return fmt.Errorf("Error updating application profile id: %s", resource.Id())
+		return fmt.Errorf("Error reading vrf id: %s", resource.Id())
 	}
 
 	resource.MapFields(resourceAciVrfFieldMap(), vrf)

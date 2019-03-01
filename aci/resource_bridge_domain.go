@@ -2,7 +2,6 @@ package aci
 
 import (
 	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	cage "github.com/ignw/cisco-aci-go-sdk/src/service"
 )
@@ -30,10 +29,12 @@ func resourceAciBridgeDomain() *schema.Resource {
 				"arp_flood": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  false,
 				},
 				"optimize_wan": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  false,
 				},
 				"mode_detect_mode": &schema.Schema{
 					Type:     schema.TypeString,
@@ -42,50 +43,62 @@ func resourceAciBridgeDomain() *schema.Resource {
 				"allow_intersite_bum_traffic": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  false,
 				},
 				"intersite_l2_stretch": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  false,
 				},
 				"ip_learning": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  true,
 				},
 				"limit_ip_to_subnets": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  true,
 				},
 				"ll_ip_address": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "::",
 				},
 				"mac": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "00:22:BD:F8:19:FF",
 				},
 				"multi_dest_forwarding": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "bd-flood",
 				},
 				"multicast": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  false,
 				},
 				"unicast_route": &schema.Schema{
 					Type:     schema.TypeBool,
 					Optional: true,
+					Default:  true,
 				},
 				"unknown_unicast_mac": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "proxy",
 				},
 				"unknown_multicast_mac": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "flood",
 				},
 				"virtual_mac": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					Default:  "not-applicable",
 				},
 				"subnets": &schema.Schema{
 					Type:     schema.TypeList,
@@ -129,6 +142,7 @@ func resourceAciBridgeDomainFieldMap() map[string]string {
 
 func resourceAciBridgeDomainCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*cage.Client)
+	resource := &AciResource{d}
 
 	tenant, err := ValidateAndFetchTenant(d, meta)
 
@@ -136,7 +150,9 @@ func resourceAciBridgeDomainCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating bridge domain: %s", err.Error())
 	}
 
-	bridgeDomain := client.BridgeDomains.New(d.Get("name").(string), d.Get("description").(string))
+	bridgeDomain := client.BridgeDomains.New(resource.Get("name").(string), resource.Get("description").(string))
+
+	resource.MapFieldsToAci(resourceAciBridgeDomainFieldMap(), bridgeDomain)
 
 	tenant.AddBridgeDomain(bridgeDomain)
 
