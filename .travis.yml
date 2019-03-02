@@ -13,6 +13,8 @@ stages:
   if: branch = master OR type = pull_request
 jobs:
   include:
+  - stage: format
+    script: make fmt
   - stage: compile
     script: make
   - stage: acceptance
