@@ -36,7 +36,7 @@ RUN git clone https://github.com/IGNW/terraform-provider-cisco-aci.git
 
 # Install the SDK
 WORKDIR $GOPATH/src/github.com/ignw/cisco-aci-go-sdk
-#RUN make install
+RUN make install
 
 # Install the Terraform provider
 WORKDIR $GOPATH/src/github.com/ignw/terraform-provider-cisco-aci
