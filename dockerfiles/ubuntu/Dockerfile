@@ -46,5 +46,7 @@ RUN make deps
 RUN make fmt
 RUN make build
 
-#RUN mkdir -p examples/example_1/terraform.d/plugins/linux_amd64
-#RUN cp /root/go/bin/terraform-provider-aci examples/example_1/terraform.d/plugins/linux_amd64
+WORKDIR /root/
+
+RUN mkdir -p /root/.terraform.d/plugins/linux_amd64
+RUN cp /root/go/bin/terraform-provider-aci /root/.terraform.d/plugins/linux_amd64/terraform-provider-aci
